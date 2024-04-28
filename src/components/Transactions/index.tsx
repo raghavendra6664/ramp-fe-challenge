@@ -9,6 +9,7 @@ export const Transactions: TransactionsComponent = ({ transactions }) => {
 
   const setTransactionApproval = useCallback<SetTransactionApprovalFunction>(
     async ({ transactionId, newValue }) => {
+      console.log("async :: ", transactionId, newValue)
       await fetchWithoutCache<void, SetTransactionApprovalParams>("setTransactionApproval", {
         transactionId,
         value: newValue,
@@ -20,6 +21,8 @@ export const Transactions: TransactionsComponent = ({ transactions }) => {
   if (transactions === null) {
     return <div className="RampLoading--container">Loading...</div>
   }
+
+  console.log("tranasctions ::: ", transactions)
 
   return (
     <div data-testid="transaction-container">
