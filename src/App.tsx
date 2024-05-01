@@ -13,21 +13,14 @@ export function App() {
   const { data: paginatedTransactions, ...paginatedTransactionsUtils } = usePaginatedTransactions()
   const { data: transactionsByEmployee, ...transactionsByEmployeeUtils } = useTransactionsByEmployee()
   const [isLoading, setIsLoading] = useState(false)
-  // const [getSelected, setSelected] = useState(null)
-  const [past, setPrevious] = useState([])
 
   const transactions = useMemo(() => {
-    console.log("transaction :: memo :: ", paginatedTransactions)
-    // if (paginatedTransactions) {
-    //   setPrevious([...past, ...paginatedTransactions.data])
-    // }
-    return paginatedTransactions?.data.concat(past) ?? transactionsByEmployee ?? null
-  }, [paginatedTransactions, transactionsByEmployee, past])
+    return paginatedTransactions?.data ?? transactionsByEmployee ?? null
+  }, [paginatedTransactions, transactionsByEmployee])
 
   const loadAllTransactions = useCallback(async () => {
     setIsLoading(true)
     transactionsByEmployeeUtils.invalidateData()
-
     await employeeUtils.fetchAll()
     await paginatedTransactionsUtils.fetchAll()
 
@@ -36,11 +29,11 @@ export function App() {
 
   const loadTransactionsByEmployee = useCallback(
     async (employeeId: string) => {
+      setIsLoading(true)
       paginatedTransactionsUtils.invalidateData()
+      transactionsByEmployeeUtils.invalidateData()
       await transactionsByEmployeeUtils.fetchById(employeeId)
-      // await paginatedTransactionsUtils.fetchAll()
-
-      // await paginatedTransactionsUtils.fetchAll()
+      setIsLoading(false)
     },
     [paginatedTransactionsUtils, transactionsByEmployeeUtils]
   )
@@ -69,8 +62,6 @@ export function App() {
             label: `${item.firstName} ${item.lastName}`,
           })}
           onChange={async (newValue) => {
-            console.log("newvalue :: ", newValue)
-            // setSelected(newValue)
             if (newValue === null) {
               return
             }
@@ -83,13 +74,11 @@ export function App() {
 
         <div className="RampGrid">
           <Transactions transactions={transactions} />
-          {transactions !== null && paginatedTransactions?.data && (
+          {transactions !== null && paginatedTransactions?.nextPage && (
             <button
               className="RampButton"
               disabled={paginatedTransactionsUtils.loading}
               onClick={async () => {
-                setPrevious([...past, ...paginatedTransactions.data])
-                // console.log("view more :: ", transactionsByEmployee, employees, transactions)
                 await loadAllTransactions()
               }}
             >
